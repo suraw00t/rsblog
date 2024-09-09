@@ -51,7 +51,7 @@ To get started with the project, follow these steps:
 
 5. **Access the API documentation**: You can access the API documentation using the following URLs:
 
-    - Swagger UI: http://localhost:8080/swagger
+    - Swagger UI: http://localhost:8080/swagger-ui/
     - Redoc: http://localhost:8080/redoc
     - RapiDoc: http://localhost:8080/rapidoc
     - Scalar: http://localhost:8080/scalar
