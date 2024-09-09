@@ -41,6 +41,13 @@ To get started with the project, follow these steps:
    cargo build
    ```
 
+   Create `.env` file:
+   ```
+   MONGODB_URI=mongodb://localhost:27017
+   DATABASE_NAME=rsblog
+   ```
+
+
    Then, run the project:
 
    ```bash
