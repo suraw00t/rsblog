@@ -31,7 +31,7 @@ To get started with the project, follow these steps:
 3. **Clone the repository**: Clone the rsblog repository from GitHub:
 
    ```bash
-   git clone https://github.com/your-username/rsblog.git
+   git clone https://github.com/suraw00t/rsblog.git
    ```
 
 4. **Build and run the project**: Navigate to the project directory and build the project using Cargo:
