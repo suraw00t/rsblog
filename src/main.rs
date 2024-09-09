@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
             .configure(app::config)
     })
     .workers(1)
-    .bind((std::net::Ipv4Addr::LOCALHOST, 8081))?
+    .bind((std::net::Ipv4Addr::LOCALHOST, 8080))?
     .run()
     .await
 }
