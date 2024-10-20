@@ -1,6 +1,7 @@
 use actix_files::NamedFile;
 use actix_web::{web, Result};
 use include_dir::{include_dir, Dir};
+use phf::phf_map;
 use std::path::{Path, PathBuf};
 use tempfile::Builder;
 use tera::Tera;
@@ -9,24 +10,35 @@ use tera::Tera;
 mod errors;
 mod views;
 
+static STATIC_FILES: phf::Map<&'static str, &'static [u8]> = phf_map! {
+    "src/output.css" => include_bytes!("static/src/output.css"),
+    "images/catff.png" => include_bytes!("static/images/catff.png"),
+    "node_modules/preline/dist/preline.js" => include_bytes!("static/node_modules/preline/dist/preline.js"),
+};
+
 static TEMPLATE_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/app/templates");
-static STATIC_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/app/static");
+// static STATIC_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/src/app/static");
 
 async fn serve_static(path: web::Path<String>) -> Result<NamedFile> {
     let path: PathBuf = path.into_inner().parse().unwrap();
-    if let Some(file) = STATIC_DIR.get_file(path.to_str().unwrap()) {
+    let file_path = path.to_str().unwrap();
+
+    // if let Some(file) = STATIC_DIR.get_file(path.to_str().unwrap()) {
+    if let Some(file) = STATIC_FILES.get(file_path) {
         // Create a temporary file and write the contents
         let temp_dir = Builder::new().prefix("static").tempdir()?;
         let temp_path = temp_dir.path().join(path);
         if let Some(parent) = temp_path.parent() {
             std::fs::create_dir_all(parent)?;
         }
-        std::fs::write(&temp_path, file.contents())?;
+        std::fs::write(&temp_path, file)?;
+        // std::fs::write(&temp_path, file.contents())?;
         Ok(NamedFile::open(temp_path)?)
     } else {
-        Err(actix_web::error::ErrorNotFound("File not found"))
+        Err(actix_web::error::ErrorNotFound("File not found")) // Implement to return page Not Found
     }
 }
+
 pub fn initialize_template() -> Tera {
     let mut tera = Tera::default();
 
@@ -56,7 +68,10 @@ pub fn initialize_template() -> Tera {
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.configure(views::config)
-        .service(web::resource("/static/{filename:.*}").to(serve_static));
+    cfg.configure(views::config).service(
+        web::resource("/static/{filename:.*}")
+            .name("static")
+            .to(serve_static),
+    );
     // .default_service(web::to(errors::error_handlers));
 }
