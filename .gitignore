@@ -1,3 +1,5 @@
 target
 *.swp
 .env*
+node_modules/
+package-lock.json
