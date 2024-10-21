@@ -88,7 +88,7 @@ async fn main() -> std::io::Result<()> {
         std::env::var("PORT6")
             .ok()
             .and_then(|s| s.parse().ok())
-            .unwrap_or(8081),
+            .unwrap_or(8080),
     ))?
     .bind((
         std::env::var("ADDR")
