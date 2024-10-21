@@ -21,6 +21,7 @@ tempfile = "3"
 dotenvy = "0.15"
 mongodb = "3"
 futures = "0.3"
+phf = { version = "0.11", features = ["macros"] }
 
 utoipa = { version = "5", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "8", features = ["actix-web"] }
