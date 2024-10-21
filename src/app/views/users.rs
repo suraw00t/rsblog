@@ -1,7 +1,9 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 
 #[get("/info")]
-async fn get_info() -> impl Responder {
+async fn get_info(req: HttpRequest) -> impl Responder {
+    let url = req.url_for("reset_password", &[] as &[&str]);
+    println!("{:?}", url);
     HttpResponse::Ok().body("User Info")
 }
 
