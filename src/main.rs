@@ -74,8 +74,32 @@ async fn main() -> std::io::Result<()> {
                 srv.borrow().call(req)
             })
     })
-    .workers(1)
-    .bind((std::net::Ipv4Addr::LOCALHOST, 8080))?
+    .workers(
+        std::env::var("WORKERS")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(1),
+    )
+    .bind((
+        std::env::var("ADDR6")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(std::net::Ipv6Addr::LOCALHOST),
+        std::env::var("PORT6")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(8081),
+    ))?
+    .bind((
+        std::env::var("ADDR")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(std::net::Ipv4Addr::LOCALHOST),
+        std::env::var("PORT")
+            .ok()
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(8080),
+    ))?
     .run()
     .await
 }
