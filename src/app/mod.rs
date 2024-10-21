@@ -1,5 +1,5 @@
 use actix_files::NamedFile;
-use actix_web::{error, web, HttpResponse, Result};
+use actix_web::{error, get, web, HttpResponse, Result};
 use tera::Tera;
 
 #[path = "utils/errors.rs"]
@@ -69,6 +69,7 @@ pub fn initialize_template() -> Tera {
     tera
 }
 
+#[get("/favicon.ico")]
 async fn serve_favicon() -> Result<HttpResponse> {
     if let Some(favicon_data) = STATIC_FILES.get("favicon.ico") {
         Ok(HttpResponse::Ok()
@@ -81,11 +82,11 @@ async fn serve_favicon() -> Result<HttpResponse> {
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.configure(views::config)
-        .route("/favicon.ico", web::get().to(serve_favicon))
         .service(
             web::resource("/static/{filename:.*}")
                 .name("static")
                 .to(serve_static),
-        );
+        )
+        .service(serve_favicon);
     // .default_service(web::to(errors::error_handlers));
 }
