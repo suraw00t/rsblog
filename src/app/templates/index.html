@@ -2,9 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Actix Web</title>
-  <link rel="stylesheet" href="static/src/output.css">
-  <!-- <script src="static/node_modules/preline/dist/preline.js"></script> -->
+  <title>{{ get_env(name='APP_TITLE', default='') }}</title>
+  <link rel="stylesheet" href="{{ url_for(name='static', elements=['src/output.css']) | safe }}">
+  <script src="{{ url_for(name='static', elements=['node_modules/preline/dist/preline.js']) | safe }}"></script>
 </head>
 <body>
   <h1>Welcome!</h1>
@@ -15,9 +15,7 @@
       <p><input type="submit"></p>
     </form>
   </p>
-  <img src="static/images/catff.png" alt="Logo">
-  <img src="{{ url_for(name='static', elements=['images/catff.png']) }}" alt="Logo">
-  {#- <img src="{{ url_for(name='static', elements=['images/catff.png']) }}" alt="Logo"> #}
+  <img src="{{ url_for(name='static', elements=['images/catff.png']) | safe }}" alt="Logo">
 
       <!-- ========== MAIN CONTENT ========== -->
       <main id="content">
