@@ -10,6 +10,7 @@ static STATIC_FILES: phf::Map<&'static str, &'static [u8]> = phf::phf_map! {
     "favicon.ico" => include_bytes!("static/images/favicon.ico"),
     "src/output.css" => include_bytes!("static/src/output.css"),
     "images/catff.png" => include_bytes!("static/images/catff.png"),
+    "images/logo.png" => include_bytes!("static/images/logo.png"),
     "node_modules/preline/dist/preline.js" => include_bytes!("static/node_modules/preline/dist/preline.js"),
 };
 
