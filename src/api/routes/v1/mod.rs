@@ -9,9 +9,6 @@ pub mod users;
 pub struct V1Api;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/v1")
-            .configure(root::config)
-            .configure(users::config),
-    );
+    cfg.configure(root::config)
+        .service(web::scope("/v1").configure(users::config));
 }

@@ -1,6 +1,6 @@
-use actix_web::{get, post, web, Error, HttpRequest, HttpResponse, Result};
+use actix_web::{post, routes, web, Error, HttpRequest, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
+use serde_json::from_slice;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct MyObj {
@@ -8,15 +8,17 @@ struct MyObj {
     number: i32,
 }
 
+#[routes]
+#[get("")]
 #[get("/")]
 async fn root() -> HttpResponse {
-    let response = json!({
-        "message": "Received your data",
-        "data": 0,
-        "additional": "Some extra info"
-    });
+    // let response = json!({
+    //     "message": "Received your data",
+    //     "data": 0,
+    //     "additional": "Some extra info"
+    // });
 
-    HttpResponse::Ok().json(response)
+    HttpResponse::Ok().body("")
 }
 
 /// This handler uses json extractor
@@ -38,7 +40,7 @@ async fn extract_item(item: web::Json<MyObj>, req: HttpRequest) -> HttpResponse 
 #[post("/manual")]
 async fn index_manual(body: web::Bytes) -> Result<HttpResponse, Error> {
     // body is loaded, now we can deserialize serde-json
-    let obj = serde_json::from_slice::<MyObj>(&body)?;
+    let obj = from_slice::<MyObj>(&body)?;
     Ok(HttpResponse::Ok().json(obj)) // <- send response
 }
 
