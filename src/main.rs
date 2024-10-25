@@ -4,6 +4,7 @@ use actix_web::{
     test::TestRequest,
     web, App, HttpServer,
 };
+use actix_web_lab::header::X_FORWARDED_PREFIX;
 use std::{borrow::Borrow, cell::RefCell, collections::HashMap};
 
 mod api;
@@ -41,7 +42,21 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
         let url = routes
             .url_for(&fake_req, name, elements)
             .or(Err(tera::Error::msg("resource not found")))?;
-        Ok(tera::Value::String(url.path().to_string()))
+
+        // Manually combine the prefix with the path
+        let prefix = fake_req
+            .headers()
+            .get(X_FORWARDED_PREFIX)
+            .and_then(|h| h.to_str().ok())
+            .unwrap_or("");
+        let path = url.path();
+        let full_path = if prefix.is_empty() {
+            path.to_string()
+        } else {
+            format!("{}{}", prefix, path)
+        };
+
+        Ok(tera::Value::String(full_path))
     })
 }
 
