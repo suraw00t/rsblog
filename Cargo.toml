@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
-actix-web-lab = "0.21"
+actix-web-lab = "0.23"
 actix-files = "0.6"
 
 tera = "1"
@@ -21,6 +21,7 @@ tempfile = "3"
 dotenvy = "0.15"
 mongodb = "3"
 futures = "0.3"
+futures-util = "0.3"
 phf = { version = "0.11", features = ["macros"] }
 
 utoipa = { version = "5", features = ["actix_extras"] }

@@ -38,7 +38,13 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
         let url = routes
             .url_for(&fake_req, name, elements)
             .or(Err(tera::Error::msg("resource not found")))?;
-        Ok(tera::Value::String(url.path().to_string()))
+        Ok(tera::Value::String(
+            url.path()
+                .to_string()
+                .strip_prefix("/")
+                .unwrap_or(&url.path().to_string())
+                .to_string(),
+        ))
     })
 }
 
