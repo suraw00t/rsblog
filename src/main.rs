@@ -80,16 +80,16 @@ async fn main() -> std::io::Result<()> {
             .and_then(|s| s.parse().ok())
             .unwrap_or(1),
     )
-    .bind((
-        std::env::var("ADDR6")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(std::net::Ipv6Addr::LOCALHOST),
-        std::env::var("PORT6")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(8080),
-    ))?
+    // .bind((
+    //     std::env::var("ADDR6")
+    //         .ok()
+    //         .and_then(|s| s.parse().ok())
+    //         .unwrap_or(std::net::Ipv6Addr::LOCALHOST),
+    //     std::env::var("PORT6")
+    //         .ok()
+    //         .and_then(|s| s.parse().ok())
+    //         .unwrap_or(8080),
+    // ))?
     .bind((
         std::env::var("ADDR")
             .ok()
