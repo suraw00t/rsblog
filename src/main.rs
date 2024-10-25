@@ -14,6 +14,7 @@ mod forwarded_prefix;
 
 thread_local! {
     static ROUTES_KEY: RefCell<Option<ResourceMap>> = RefCell::new(None);
+    static REQUEST_PREFIX: RefCell<Option<String>> = RefCell::new(None);
 }
 
 fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera::Error> {
@@ -38,12 +39,13 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
         let routes = routes_ref.as_ref().ok_or(tera::Error::msg(
             "`url_for` should only be called in request context",
         ))?;
-        let fake_req = TestRequest::default().to_http_request();
+        let prefix = REQUEST_PREFIX.with(|p| p.borrow().clone().unwrap_or_default());
+        let fake_req = TestRequest::default()
+            .insert_header((X_FORWARDED_PREFIX, prefix.as_str()))
+            .to_http_request();
         let url = routes
             .url_for(&fake_req, name, elements)
             .or(Err(tera::Error::msg("resource not found")))?;
-
-        // Manually combine the prefix with the path
         let prefix = fake_req
             .headers()
             .get(X_FORWARDED_PREFIX)
@@ -90,6 +92,13 @@ async fn main() -> std::io::Result<()> {
                         .borrow_mut()
                         .get_or_insert_with(|| req.resource_map().clone());
                 });
+                if let Some(prefix) = req.headers().get(X_FORWARDED_PREFIX) {
+                    if let Ok(prefix_str) = prefix.to_str() {
+                        REQUEST_PREFIX.with(|p| {
+                            *p.borrow_mut() = Some(prefix_str.to_string());
+                        });
+                    }
+                }
                 srv.borrow().call(req)
             })
     })
