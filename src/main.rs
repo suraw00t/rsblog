@@ -40,17 +40,10 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
             "`url_for` should only be called in request context",
         ))?;
         let prefix = REQUEST_PREFIX.with(|p| p.borrow().clone().unwrap_or_default());
-        let fake_req = TestRequest::default()
-            .insert_header((X_FORWARDED_PREFIX, prefix.as_str()))
-            .to_http_request();
+        let fake_req = TestRequest::default().to_http_request();
         let url = routes
             .url_for(&fake_req, name, elements)
             .or(Err(tera::Error::msg("resource not found")))?;
-        let prefix = fake_req
-            .headers()
-            .get(X_FORWARDED_PREFIX)
-            .and_then(|h| h.to_str().ok())
-            .unwrap_or("");
         let path = url.path();
         let full_path = if prefix.is_empty() {
             path.to_string()
