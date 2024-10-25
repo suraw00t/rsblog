@@ -54,6 +54,10 @@ where
         match req.headers().get(X_FORWARDED_PREFIX) {
             None => {}
             Some(header) => {
+                log::debug!(
+                    "X_FORWARDED_PREFIX: {:?}",
+                    req.headers().get(X_FORWARDED_PREFIX)
+                );
                 prefix = header.to_str().unwrap().to_string();
             }
         }

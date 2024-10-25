@@ -62,13 +62,13 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             // enable logger
+            .wrap(forwarded_prefix::ForwardPrefix)
             .wrap(middleware::Logger::default())
             .app_data(web::JsonConfig::default()) // <- limit size of the payload (global configuration)
             .app_data(web::Data::new(tera.clone()))
             .app_data(web::Data::new(database.clone()))
             .configure(api::config)
             .configure(app::config)
-            .wrap(forwarded_prefix::ForwardPrefix)
             .wrap_fn(move |req, srv| {
                 ROUTES_KEY.with(|routes| {
                     routes
