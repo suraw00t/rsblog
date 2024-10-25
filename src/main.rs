@@ -50,9 +50,9 @@ async fn main() -> std::io::Result<()> {
     let config = api::core::config::Config::from_env();
     let database = db::connect_to_mongodb(&config)
         .await
-        .expect("Failed to connect to MongoDB");
+        .expect(format!("Failed to connect to MongoDB: {:?}", config.mongodb_uri).as_str());
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    log::info!("starting HTTP server");
     let mut tera = app::initialize_template();
     tera.register_function("url_for", tera_url_for);
 
