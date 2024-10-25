@@ -1,12 +1,15 @@
-use actix_web::dev::Service;
-use actix_web::{dev::ResourceMap, middleware, test::TestRequest, web, App, HttpServer};
-use std::borrow::Borrow;
-use std::cell::RefCell;
-use std::collections::HashMap;
+use actix_web::{
+    dev::{ResourceMap, Service},
+    middleware,
+    test::TestRequest,
+    web, App, HttpServer,
+};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap};
 
 mod api;
 mod app;
 mod db;
+mod forwarded_prefix;
 
 thread_local! {
     static ROUTES_KEY: RefCell<Option<ResourceMap>> = RefCell::new(None);
@@ -71,6 +74,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(database.clone()))
             .configure(api::config)
             .configure(app::config)
+            .wrap(forwarded_prefix::ForwardPrefix)
             .wrap_fn(move |req, srv| {
                 ROUTES_KEY.with(|routes| {
                     routes
