@@ -20,13 +20,10 @@ mod routes;
 struct ApiDoc;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    let mut openapi_json = "/api-docs/openapi.json".to_string();
-    if let Some(prefix) = std::env::var("PREFIX").ok() {
-        openapi_json = format!("{}{}", prefix, openapi_json);
-    }
+    let openapi_json = "/api-docs/openapi.json";
     cfg.service(web::scope("/api").configure(routes::config))
-        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json.clone(), ApiDoc::openapi()))
-        .service(RapiDoc::new(openapi_json.clone()).path("/rapidoc"))
+        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json, ApiDoc::openapi()))
+        .service(RapiDoc::new(openapi_json).path("/rapidoc"))
         .service(Scalar::with_url("/scalar", ApiDoc::openapi()))
         .service(Redoc::with_url("/redoc", ApiDoc::openapi()));
 }
