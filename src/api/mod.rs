@@ -13,11 +13,18 @@ mod routes;
 #[derive(OpenApi)]
 #[openapi(
     nest(
-       (path = "/api", api = routes::v1::V1Api)
+       (path = get_api_path(), api = routes::v1::V1Api)
     ),
     modifiers()
 )]
 struct ApiDoc;
+
+fn get_api_path() -> String {
+    match std::env::var("PREFIX") {
+        Ok(prefix) => format!("{}/api", prefix.trim_end_matches('/')),
+        Err(_) => "/api".to_string(),
+    }
+}
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     let openapi_json = "/api-docs/openapi.json";
