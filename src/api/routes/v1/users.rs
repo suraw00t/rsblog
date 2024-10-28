@@ -18,7 +18,7 @@ pub struct UserApi;
 #[utoipa::path(
     responses(
         (status = 201, description = "User created successfully", body = User),
-        (status = 500, description = "Internal server error")
+        (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     ),
 )]
 #[post("/users")]
@@ -45,7 +45,7 @@ pub async fn create_user(db: web::Data<Database>, user: web::Json<User>) -> impl
 #[utoipa::path(
     responses(
         (status = 200, description = "List of users", body = Vec<User>),
-        (status = 500, description = "Internal server error")
+        (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     )
 )]
 #[get("/users")]
@@ -72,8 +72,8 @@ pub async fn get_users(db: web::Data<Database>) -> impl Responder {
 #[utoipa::path(
     responses(
         (status = 200, description = "A user", body = User),
-        (status = 404, description = "User not found"),
-        (status = 500, description = "Internal server error")
+        (status = 404, description = "User not found", body = error_handlers::ErrorResponse),
+        (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     )
 )]
 #[get("/users/{user_id}")]
@@ -93,7 +93,7 @@ async fn get_user(
         {
             Ok(user) => match user {
                 Some(user) => {
-                    log::debug!("{:?}", user);
+                    log::debug!("{:?} {:?}", user, user.id());
                     Ok(HttpResponse::Ok().json(user))
                 }
                 None => Err(error_handlers::ApiError::NotFound("User".to_string())),

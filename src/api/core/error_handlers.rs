@@ -1,6 +1,7 @@
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use serde::Serialize;
 use thiserror::Error;
+use utoipa::ToSchema;
 
 #[allow(dead_code)]
 #[derive(Error, Debug)]
@@ -85,9 +86,9 @@ pub enum ApiError {
     NetworkAuthenticationRequired(String),
 }
 
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
+#[derive(Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub error: String,
 }
 
 impl ResponseError for ApiError {
