@@ -38,13 +38,13 @@ fn get_api_path(base: &str) -> String {
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    let openapi_json = "/api-docs/openapi.json";
+    let openapi_json = get_api_path("/api-docs/openapi.json");
     let mut doc = ApiDoc::openapi();
     doc.servers = Some(get_servers("/"));
 
     cfg.service(web::scope("/api").configure(routes::config))
-        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json, doc.clone()))
-        .service(RapiDoc::new(openapi_json).path("/rapidoc"))
+        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json.clone(), doc.clone()))
+        .service(RapiDoc::new(openapi_json.clone()).path("/rapidoc"))
         .service(Scalar::with_url("/scalar", doc.clone()))
         .service(Redoc::with_url("/redoc", doc.clone()));
 }
