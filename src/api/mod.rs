@@ -1,6 +1,6 @@
 use actix_web::web;
 
-use utoipa::OpenApi;
+use utoipa::{openapi::Server, openapi::ServerBuilder, OpenApi};
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
@@ -13,24 +13,38 @@ mod routes;
 #[derive(OpenApi)]
 #[openapi(
     nest(
-       (path = get_api_path(), api = routes::v1::V1Api)
-    ),
-    modifiers()
+       (path = "/api", api = routes::v1::V1Api)
+    )
 )]
 struct ApiDoc;
 
-fn get_api_path() -> String {
+fn get_servers(base: &str) -> Vec<Server> {
     match std::env::var("PREFIX") {
-        Ok(prefix) => format!("{}/api", prefix.trim_end_matches('/')),
-        Err(_) => "/api".to_string(),
+        Ok(prefix) => vec![ServerBuilder::new()
+            .url(&format!("{}", prefix.trim_end_matches('/')))
+            .description(Some("Production Server"))
+            .build()],
+        Err(_) => vec![ServerBuilder::new()
+            .url(base)
+            .description(Some("Production Server"))
+            .build()],
+    }
+}
+fn get_api_path(base: &str) -> String {
+    match std::env::var("PREFIX") {
+        Ok(prefix) => format!("{}{}", prefix.trim_end_matches('/'), base),
+        Err(_) => base.to_string(),
     }
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    let openapi_json = "/api-docs/openapi.json";
+    let openapi_json = get_api_path("/api-docs/openapi.json");
+    let mut doc = ApiDoc::openapi();
+    doc.servers = Some(get_servers("/"));
+
     cfg.service(web::scope("/api").configure(routes::config))
-        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json, ApiDoc::openapi()))
-        .service(RapiDoc::new(openapi_json).path("/rapidoc"))
-        .service(Scalar::with_url("/scalar", ApiDoc::openapi()))
-        .service(Redoc::with_url("/redoc", ApiDoc::openapi()));
+        .service(SwaggerUi::new("/swagger-ui/{_:.*}").url(openapi_json.clone(), doc.clone()))
+        .service(RapiDoc::new(openapi_json.clone()).path("/rapidoc"))
+        .service(Scalar::with_url("/scalar", doc.clone()))
+        .service(Redoc::with_url("/redoc", doc.clone()));
 }
