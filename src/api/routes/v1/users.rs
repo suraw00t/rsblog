@@ -1,7 +1,10 @@
 use crate::api::models::user::User;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use futures::TryStreamExt;
-use mongodb::Database;
+use mongodb::{
+    bson::{doc, oid::ObjectId},
+    Database,
+};
 use serde_json::json;
 use utoipa::OpenApi;
 
@@ -9,7 +12,7 @@ use utoipa::OpenApi;
 mod error_handlers;
 
 #[derive(OpenApi)]
-#[openapi(paths(create_user, get_users), components(schemas(User)))]
+#[openapi(paths(create_user, get_users, get_user), components(schemas(User)))]
 pub struct UserApi;
 
 #[utoipa::path(
@@ -48,10 +51,10 @@ pub async fn create_user(db: web::Data<Database>, user: web::Json<User>) -> impl
 #[get("/users")]
 pub async fn get_users(db: web::Data<Database>) -> impl Responder {
     let collection = db.collection::<User>("users");
-    match collection.find(mongodb::bson::doc! {}).await {
+    match collection.find(doc! {}).await {
         Ok(cursor) => match cursor.try_collect::<Vec<User>>().await {
             Ok(users) => {
-                println!("Found {:?} users", users);
+                log::debug!("Found {:?} users", users);
                 HttpResponse::Ok().json(users)
             }
             Err(e) => {
@@ -66,14 +69,40 @@ pub async fn get_users(db: web::Data<Database>) -> impl Responder {
     }
 }
 
+#[utoipa::path(
+    responses(
+        (status = 200, description = "A user", body = User),
+        (status = 404, description = "User not found"),
+        (status = 500, description = "Internal server error")
+    )
+)]
 #[get("/users/{user_id}")]
-async fn get_user(user_id: web::Path<String>) -> Result<HttpResponse, error_handlers::ApiError> {
+async fn get_user(
+    user_id: web::Path<String>,
+    db: web::Data<Database>,
+) -> Result<HttpResponse, error_handlers::ApiError> {
     // Simulate user lookup
-    if user_id.as_str() == "123" {
-        Ok(HttpResponse::Ok().json(json!({"id": "123", "name": "John Doe"})))
+    let oid = ObjectId::parse_str(user_id.as_str());
+    if oid.is_ok() {
+        let collection = db.collection::<User>("users");
+        match collection
+            .find_one(doc! {
+               "_id": oid.unwrap()
+            })
+            .await
+        {
+            Ok(user) => match user {
+                Some(user) => {
+                    log::debug!("{:?}", user);
+                    Ok(HttpResponse::Ok().json(user))
+                }
+                None => Err(error_handlers::ApiError::NotFound("User".to_string())),
+            },
+            Err(e) => Err(error_handlers::ApiError::InternalServerError(e.to_string())),
+        }
     } else {
         Err(error_handlers::ApiError::NotFound(
-            "User not found".to_string(),
+            "Not ObjectID".to_string(),
         ))
     }
 }
