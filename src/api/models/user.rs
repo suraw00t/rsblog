@@ -1,6 +1,17 @@
 use mongodb::bson::oid::ObjectId;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+use crate::api::models::serialize_object_id;
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
+pub struct BaseUser {
+    pub name: String,
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
+pub struct CreateUser(pub BaseUser);
 
 #[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct User {
@@ -11,8 +22,17 @@ pub struct User {
     )]
     #[schema(value_type = String, example = "507f1f77bcf86cd799439011")]
     pub id: Option<ObjectId>,
-    pub name: String,
-    pub email: String,
+    #[serde(flatten)]
+    pub base: BaseUser,
+}
+
+impl From<CreateUser> for User {
+    fn from(create_user: CreateUser) -> Self {
+        User {
+            id: None,
+            base: create_user.0,
+        }
+    }
 }
 
 impl User {
@@ -23,15 +43,5 @@ impl User {
 
     pub fn id(&self) -> Option<String> {
         self.id.map(|id| id.to_hex())
-    }
-}
-
-fn serialize_object_id<S>(id: &Option<ObjectId>, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    match id {
-        Some(object_id) => serializer.serialize_str(&object_id.to_hex()),
-        None => serializer.serialize_none(),
     }
 }
