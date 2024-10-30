@@ -17,7 +17,10 @@ mod routes;
     ),
     info(
         description="",
-        license(name="")
+        license(
+            name="",
+            identifier=""
+        )
     )
 )]
 struct ApiDoc;
