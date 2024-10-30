@@ -73,6 +73,7 @@ pub async fn get_users(db: web::Data<Database>) -> impl Responder {
     responses(
         (status = 200, description = "A user", body = User),
         (status = 404, description = "User not found", body = error_handlers::ErrorResponse),
+        (status = 422, description = "Invalid ObjectID", body = error_handlers::ErrorResponse),
         (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     )
 )]
