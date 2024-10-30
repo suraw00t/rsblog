@@ -1,3 +1,4 @@
+#![allow(unused)]
 use actix_web::{
     body::BoxBody,
     dev::ServiceResponse,
