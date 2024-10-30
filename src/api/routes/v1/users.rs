@@ -101,8 +101,8 @@ async fn get_user(
             Err(e) => Err(error_handlers::ApiError::InternalServerError(e.to_string())),
         }
     } else {
-        Err(error_handlers::ApiError::NotFound(
-            "Not ObjectID".to_string(),
+        Err(error_handlers::ApiError::UnprocessableEntity(
+            "Invalid ObjectID".to_string(),
         ))
     }
 }
