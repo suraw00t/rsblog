@@ -6,15 +6,20 @@
   - [x] add support PREFIX in environment variable
 - [x] Added embed file
 - [x] Added embed whole directory
-- [x] Cleaned code makes development easier
+- [x] Clean code makes development easier
 
 ## OpenAPI Specification
 - [x] Added OpenAPI 3.1
+- [x] Added good HTTP status code and detail
 
 ## Template
 - [x] Support Tera template
 - [x] Added a `url_for` for generate url in template
 - [x] Added base template
+
+## Style
+- [x] Added tailwind
+  - [x] Added plugin preline ui
 
 ## Database
 - [x] Added MongoDB driver
