@@ -15,13 +15,6 @@ mod routes;
     nest(
        (path = "/api", api = routes::v1::V1Api)
     ),
-    info(
-        description="",
-        license(
-            name="",
-            identifier=""
-        )
-    )
 )]
 struct ApiDoc;
 
@@ -55,7 +48,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
         .service(
             SwaggerUi::new("/swagger-ui/{_:.*}")
                 .url(openapi_json, doc.clone())
-                .config(Config::new([openapi_json_with_prefix.clone()])),
+                .config(Config::new([openapi_json_with_prefix.clone()]).validator_url("")),
         )
         .service(RapiDoc::new(openapi_json_with_prefix.clone()).path("/rapidoc"))
         .service(Scalar::with_url("/scalar", doc.clone()))
