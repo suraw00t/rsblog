@@ -2,11 +2,12 @@ use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize, Serializer};
 use utoipa::ToSchema;
 
-#[derive(Deserialize, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, ToSchema)]
 pub struct User {
     #[serde(
         rename(serialize = "id", deserialize = "_id"),
-        skip_serializing_if = "Option::is_none"
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "serialize_object_id"
     )]
     #[schema(value_type = String, example = "507f1f77bcf86cd799439011")]
     pub id: Option<ObjectId>,
@@ -25,21 +26,12 @@ impl User {
     }
 }
 
-// Implement custom Serialize for User
-impl Serialize for User {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        use serde::ser::SerializeStruct;
-        let mut state = serializer.serialize_struct("User", 3)?;
-        if let Some(id) = &self.id {
-            state.serialize_field("id", &id.to_hex())?;
-        } else {
-            state.serialize_field("id", &Option::<String>::None)?;
-        }
-        state.serialize_field("name", &self.name)?;
-        state.serialize_field("email", &self.email)?;
-        state.end()
+fn serialize_object_id<S>(id: &Option<ObjectId>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match id {
+        Some(object_id) => serializer.serialize_str(&object_id.to_hex()),
+        None => serializer.serialize_none(),
     }
 }
