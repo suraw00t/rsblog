@@ -8,7 +8,7 @@ use serde_json::json;
 use utoipa::OpenApi;
 
 use crate::api::core::error_handlers;
-use crate::api::models::user::User;
+use crate::api::models::user::{CreateUser, User};
 
 #[derive(OpenApi)]
 #[openapi(paths(create_user, get_users, get_user), components(schemas(User)))]
@@ -21,14 +21,14 @@ pub struct UserApi;
     ),
 )]
 #[post("/users")]
-pub async fn create_user(db: web::Data<Database>, user: web::Json<User>) -> impl Responder {
-    let mut user_data = user.into_inner();
+pub async fn create_user(db: web::Data<Database>, user: web::Json<CreateUser>) -> impl Responder {
+    let user_data = User::from(user.into_inner());
     let collection = db.collection::<User>("users");
     match collection.insert_one(&user_data).await {
         Ok(result) => {
             if let Some(id) = result.inserted_id.as_object_id() {
-                user_data = user_data.with_id(id);
-                HttpResponse::Created().json(user_data)
+                let new_user = user_data.with_id(id);
+                HttpResponse::Created().json(new_user)
             } else {
                 HttpResponse::InternalServerError().json(json!({"error": "Failed to generate ID"}))
             }
