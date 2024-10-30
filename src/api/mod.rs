@@ -14,6 +14,10 @@ mod routes;
 #[openapi(
     nest(
        (path = "/api", api = routes::v1::V1Api)
+    ),
+    info(
+        description="",
+        license(name="")
     )
 )]
 struct ApiDoc;
