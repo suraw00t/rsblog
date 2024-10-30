@@ -1,4 +1,3 @@
-use crate::api::models::user::User;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use futures::TryStreamExt;
 use mongodb::{
@@ -8,8 +7,8 @@ use mongodb::{
 use serde_json::json;
 use utoipa::OpenApi;
 
-#[path = "../../core/error_handlers.rs"]
-mod error_handlers;
+use crate::api::core::error_handlers;
+use crate::api::models::user::User;
 
 #[derive(OpenApi)]
 #[openapi(paths(create_user, get_users, get_user), components(schemas(User)))]
