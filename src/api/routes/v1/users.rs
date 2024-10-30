@@ -74,7 +74,6 @@ pub async fn get_users(db: web::Data<Database>) -> impl Responder {
         (status = 200, description = "A user", body = User),
         (status = 404, description = "User not found", body = error_handlers::ErrorResponse),
         (status = 422, description = "Invalid ObjectID", body = error_handlers::ErrorResponse),
-        (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     )
 )]
 #[get("/users/{user_id}")]
@@ -99,7 +98,7 @@ async fn get_user(
                 }
                 None => Err(error_handlers::ApiError::NotFound("User".to_string())),
             },
-            Err(e) => Err(error_handlers::ApiError::InternalServerError(e.to_string())),
+            Err(e) => Err(error_handlers::ApiError::UnprocessableEntity(e.to_string())),
         }
     } else {
         Err(error_handlers::ApiError::UnprocessableEntity(
