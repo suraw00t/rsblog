@@ -1,8 +1,8 @@
-use actix_web::{error, get, web, Error, Responder, Result};
+use actix_web::{error, web, Error, Responder, Result};
 use std::collections::HashMap;
 
-#[get("/")]
-async fn index_template(
+// #[get("/")]
+async fn index(
     tmpl: web::Data<tera::Tera>,
     query: web::Query<HashMap<String, String>>,
 ) -> Result<impl Responder, Error> {
@@ -22,5 +22,5 @@ async fn index_template(
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(index_template);
+    cfg.service(web::resource("/").name("root::index").to(index));
 }
