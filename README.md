@@ -2,7 +2,7 @@
 
 ## Introduction
 
-rsblog is a project that aims to practice Rust programming and build a web application using the Actix Web framework. It utilizes Tera templates for rendering views, MongoDB for data storage, and provides API documentation using various tools like Swagger UI, Redoc, RapiDoc, and Scalar.
+**rsblog** is a project that aims to practice Rust programming and build a web application using the Actix Web framework. It utilizes Tera templates for rendering views, MongoDB for data storage, and provides API documentation using various tools like Swagger UI, Redoc, RapiDoc, and Scalar.
 
 ## Features
 
@@ -26,24 +26,24 @@ To get started with the project, follow these steps:
 
 1. **Install Rust**: Make sure you have Rust installed on your system. You can download it from the official Rust website: [Rust Installation](https://www.rust-lang.org/tools/install)
 
-2. **Install MongoDB**: Install MongoDB on your system. You can download it from the official MongoDB website: [MongoDB Download](https://www.mongodb.com/try/download/community)
+2. **Install npm**: Install Node.js and npm on your system. You can download it from the official Node.js website: [Node.js Download](https://nodejs.org/)
 
-3. **Clone the repository**: Clone the rsblog repository from GitHub:
+3. **Install MongoDB**: Install MongoDB on your system. You can download it from the official MongoDB website: [MongoDB Download](https://www.mongodb.com/try/download/community)
+
+4. **Clone the repository, build and run the project**: Clone the rsblog repository from GitHub then Navigate to the project directory and build the project using Cargo:
 
    ```bash
    git clone https://github.com/suraw00t/rsblog.git
    cd rsblog
    ```
 
-4. **Build and run the project**: Navigate to the project directory and build the project using Cargo:
-
-  Install css and build
+   Install css and build
    ```bash
    npm install --prefix src/app/static
    npm run tw --prefix src/app/static/
    ```
 
-  Build web
+   Build web
    ```bash
    cargo build
    ```
@@ -54,7 +54,6 @@ To get started with the project, follow these steps:
    MONGODB_URI=mongodb://localhost:27017
    DATABASE_NAME=myapp
    ```
-
 
    Then, run the project:
 
