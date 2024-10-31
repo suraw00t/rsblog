@@ -40,7 +40,7 @@ To get started with the project, follow these steps:
    Install css and build
    ```bash
    npm install --prefix src/app/static
-   npm run tw --prefix src/app/static/
+   npm run tw --prefix src/app/static
    ```
 
    Build web
