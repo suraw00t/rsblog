@@ -32,19 +32,27 @@ To get started with the project, follow these steps:
 
    ```bash
    git clone https://github.com/suraw00t/rsblog.git
+   cd rsblog
    ```
 
 4. **Build and run the project**: Navigate to the project directory and build the project using Cargo:
 
+  Install css and build
    ```bash
-   cd rsblog
+   npm install --prefix src/app/static
+   npm run tw --prefix src/app/static/
+   ```
+
+  Build web
+   ```bash
    cargo build
    ```
 
    Create `.env` file:
    ```
+   APP_TITLE="Hello Actix Web"
    MONGODB_URI=mongodb://localhost:27017
-   DATABASE_NAME=rsblog
+   DATABASE_NAME=myapp
    ```
 
 
