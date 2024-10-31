@@ -1,13 +1,12 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>{{ get_env(name='APP_TITLE', default='') }}</title>
-    <link rel="stylesheet" href="{{ url_for(name='static', elements=['src/output.css']) | safe }}"/>
-    <script src="{{ url_for(name='static', elements=['preline/dist/preline.js']) | safe }}"></script>
+    {%- block header %}{% include "base/header.html" %}{% endblock header %}
   </head>
-  <body>
+  <body class="dark:bg-neutral-900">
     {%- block content %}{% endblock content %}
     {%- block footer %}{% include "base/footer.html" %}{% endblock footer %}
+    {%- block additional_js %}{% endblock additional_js %}
+    {%- block cookie_banner %}{% include "base/cookie_banner.html" %}{% endblock cookie_banner %}
   </body>
 </html>
