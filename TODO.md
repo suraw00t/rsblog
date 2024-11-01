@@ -7,6 +7,7 @@
 - [x] Added embed file
 - [x] Added embed whole directory
 - [x] Clean code makes development easier
+- [ ] Move static information to database
 
 ## OpenAPI Specification
 - [x] Added OpenAPI 3.1
