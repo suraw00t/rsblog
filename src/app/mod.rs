@@ -40,11 +40,12 @@ async fn serve_static(path: web::Path<String>) -> Result<NamedFile> {
 
 pub fn initialize_template() -> Tera {
     let mut tera = Tera::default();
+    let mut templates: Vec<(String, String)> = Vec::new();
 
     fn add_templates_recursive(
         dir: &include_dir::Dir,
         base_path: &std::path::Path,
-        tera: &mut Tera,
+        tmpl: &mut Vec<(String, String)>,
     ) {
         for entry in dir.entries() {
             match entry {
@@ -55,18 +56,25 @@ pub fn initialize_template() -> Tera {
                         let template_path = full_path.strip_prefix(base_path).unwrap();
                         let template_name = template_path.to_str().unwrap();
                         log::debug!("Registering template: {}", template_name);
-                        tera.add_raw_template(template_name, file.contents_utf8().unwrap())
-                            .unwrap();
+                        tmpl.push((
+                            template_name.to_string(),
+                            file.contents_utf8().unwrap().to_string(),
+                        ));
                     }
                 }
                 include_dir::DirEntry::Dir(subdir) => {
-                    add_templates_recursive(subdir, base_path, tera);
+                    add_templates_recursive(subdir, base_path, tmpl);
                 }
             }
         }
     }
 
-    add_templates_recursive(&TEMPLATE_DIR, std::path::Path::new("templates"), &mut tera);
+    add_templates_recursive(
+        &TEMPLATE_DIR,
+        std::path::Path::new("templates"),
+        &mut templates,
+    );
+    tera.add_raw_templates(templates).unwrap();
     tera
 }
 
