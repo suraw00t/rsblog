@@ -9,6 +9,11 @@
 - [x] Clean code makes development easier
 - [ ] Move static information to database
 
+## Authentication
+- [ ] Add account sign up, sign in
+- [ ] Add sign up with 3rd party
+
+
 ## OpenAPI Specification
 - [x] Added OpenAPI 3.1
 - [x] Added good HTTP status code and detail
