@@ -7,6 +7,12 @@
 - [x] Added embed file
 - [x] Added embed whole directory
 - [x] Clean code makes development easier
+- [ ] Move static information to database
+
+## Authentication
+- [ ] Add account sign up, sign in
+- [ ] Add sign up with 3rd party
+
 
 ## OpenAPI Specification
 - [x] Added OpenAPI 3.1
