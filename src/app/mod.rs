@@ -4,6 +4,7 @@ use tera::Tera;
 
 #[path = "utils/errors.rs"]
 mod errors;
+mod models;
 mod views;
 
 static STATIC_FILES: phf::Map<&'static str, &'static [u8]> = phf::phf_map! {
