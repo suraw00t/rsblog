@@ -9,8 +9,7 @@ use std::{borrow::Borrow, cell::RefCell, collections::HashMap};
 
 mod api;
 mod app;
-mod db;
-mod forwarded_prefix;
+mod common;
 
 thread_local! {
     static ROUTES_KEY: RefCell<Option<ResourceMap>> = RefCell::new(None);
@@ -61,7 +60,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
 
     let config = api::core::config::Config::from_env();
-    let database = db::connect_to_mongodb(&config)
+    let database = common::db::connect_to_mongodb(&config)
         .await
         .expect(format!("Failed to connect to MongoDB: {:?}", config.mongodb_uri).as_str());
 
@@ -72,7 +71,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             // enable logger
-            .wrap(forwarded_prefix::ForwardPrefix)
+            .wrap(common::forwarded_prefix::ForwardPrefix)
             .wrap(middleware::Logger::default())
             .app_data(web::JsonConfig::default()) // <- limit size of the payload (global configuration)
             .app_data(web::Data::new(tera.clone()))
