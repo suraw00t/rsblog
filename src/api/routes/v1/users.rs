@@ -20,7 +20,7 @@ pub struct UserApi;
         (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     ),
 )]
-#[post("/users")]
+#[post("")]
 pub async fn create_user(db: web::Data<Database>, user: web::Json<CreateUser>) -> impl Responder {
     let user_data = User::from(user.into_inner());
     let collection = db.collection::<User>("users");
@@ -47,7 +47,7 @@ pub async fn create_user(db: web::Data<Database>, user: web::Json<CreateUser>) -
         (status = 500, description = "Internal server error", body = error_handlers::ErrorResponse)
     )
 )]
-#[get("/users")]
+#[get("")]
 pub async fn get_users(db: web::Data<Database>) -> impl Responder {
     let collection = db.collection::<User>("users");
     match collection.find(doc! {}).await {
@@ -75,7 +75,7 @@ pub async fn get_users(db: web::Data<Database>) -> impl Responder {
         (status = 422, description = "Invalid ObjectID", body = error_handlers::ErrorResponse),
     )
 )]
-#[get("/users/{user_id}")]
+#[get("/{user_id}")]
 async fn get_user(
     user_id: web::Path<String>,
     db: web::Data<Database>,
@@ -106,7 +106,7 @@ async fn get_user(
     }
 }
 
-#[get("/users/protected")]
+#[get("/protected")]
 async fn protected_resource() -> Result<HttpResponse, error_handlers::ApiError> {
     // Simulate authorization check
     if 1 > 2 {
@@ -119,8 +119,11 @@ async fn protected_resource() -> Result<HttpResponse, error_handlers::ApiError> 
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(protected_resource)
-        .service(get_user)
-        .service(get_users)
-        .service(create_user);
+    cfg.service(
+        web::scope("/users")
+            .service(protected_resource)
+            .service(get_user)
+            .service(get_users)
+            .service(create_user),
+    );
 }

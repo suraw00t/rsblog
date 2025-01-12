@@ -5,7 +5,7 @@ mod root;
 pub mod users;
 
 #[derive(OpenApi)]
-#[openapi(nest((path = "/v1", api = users::UserApi)))]
+#[openapi(nest((path = "/v1/users", api = users::UserApi)))]
 pub struct V1Api;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
