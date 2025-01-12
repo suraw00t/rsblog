@@ -8,11 +8,11 @@ mod models;
 mod views;
 
 static STATIC_FILES: phf::Map<&'static str, &'static [u8]> = phf::phf_map! {
-    "favicon.ico" => include_bytes!("static/images/favicon.ico"),
+    "images/favicon.ico" => include_bytes!("static/images/favicon.ico"),
     "src/output.css" => include_bytes!("static/src/output.css"),
     "images/catff.png" => include_bytes!("static/images/catff.png"),
     "images/logo.png" => include_bytes!("static/images/logo.png"),
-    "preline/dist/preline.js" => include_bytes!("static/node_modules/preline/dist/preline.js"),
+    "node_modules/preline/dist/preline.js" => include_bytes!("static/node_modules/preline/dist/preline.js"),
 };
 
 static TEMPLATE_DIR: include_dir::Dir =
@@ -81,7 +81,7 @@ pub fn initialize_template() -> Tera {
 
 #[get("/favicon.ico")]
 async fn serve_favicon() -> Result<HttpResponse> {
-    if let Some(favicon_data) = STATIC_FILES.get("favicon.ico") {
+    if let Some(favicon_data) = STATIC_FILES.get("images/favicon.ico") {
         Ok(HttpResponse::Ok()
             .content_type("image/x-icon")
             .body(favicon_data.to_vec()))

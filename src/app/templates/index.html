@@ -876,7 +876,7 @@
 {% endblock content %}
 
 {% block additional_js %}
-<script src="{{ url_for(name='static', elements=['preline/dist/preline.js']) | safe }}"></script>
+<script src="{{ url_for(name='static', elements=['node_modules/preline/dist/preline.js']) | safe }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const COOKIE_EXPIRATION_DAYS = 1;
