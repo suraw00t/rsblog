@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "~4.9"
-actix-web-lab = "~0.23"
+actix-web = "~4.10"
+actix-web-lab = "~0.24"
 actix-files = "~0.6"
 
 tera = "~1.20"
@@ -17,15 +17,15 @@ thiserror = "~2.0"
 include_dir = "~0.7"
 mime_guess = "~2.0"
 base64 = "~0.22"
-tempfile = "~3.15"
+tempfile = "~3.19"
 dotenvy = "~0.15"
-mongodb = "~3.1"
+mongodb = "~3.2"
 futures = "~0.3"
 futures-util = "~0.3"
 phf = { version = "~0.11", features = ["macros"] }
 
 utoipa = { version = "~5.3", features = ["actix_extras"] }
-utoipa-swagger-ui = { version = "~8.1", features = ["actix-web"] }
-utoipa-redoc = { version = "~5.0", features = ["actix-web"] }
-utoipa-rapidoc = { version = "~5.0", features = ["actix-web"] }
-utoipa-scalar = { version = "~0.2", features = ["actix-web"] }
+utoipa-swagger-ui = { version = "~9.0", features = ["actix-web"] }
+utoipa-redoc = { version = "~6.0", features = ["actix-web"] }
+utoipa-rapidoc = { version = "~6.0", features = ["actix-web"] }
+utoipa-scalar = { version = "~0.3", features = ["actix-web"] }
