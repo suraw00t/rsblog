@@ -7,6 +7,7 @@
 - [x] Added embed file
 - [x] Added embed whole directory
 - [x] Clean code makes development easier
+- [x] Support HTTP2
 - [ ] Move static information to database
 
 ## Authentication
