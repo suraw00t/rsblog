@@ -57,7 +57,7 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("debug"));
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     let config = api::core::config::Config::from_env();
     let database = common::db::connect_to_mongodb(&config)
@@ -70,10 +70,9 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            // enable logger
             .wrap(common::forwarded_prefix::ForwardPrefix)
             .wrap(middleware::Logger::default())
-            .app_data(web::JsonConfig::default()) // <- limit size of the payload (global configuration)
+            .app_data(web::JsonConfig::default())
             .app_data(web::Data::new(tera.clone()))
             .app_data(web::Data::new(database.clone()))
             .configure(api::config)
@@ -100,7 +99,7 @@ async fn main() -> std::io::Result<()> {
             .and_then(|s| s.parse().ok())
             .unwrap_or(1),
     )
-    .bind((
+    .bind_auto_h2c((
         std::env::var("ADDR")
             .ok()
             .and_then(|s| s.parse().ok())
