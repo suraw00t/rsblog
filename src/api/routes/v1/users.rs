@@ -7,8 +7,9 @@ use mongodb::{
 use serde_json::json;
 use utoipa::OpenApi;
 
-use crate::api::core::error_handlers;
 use crate::api::models::user::{CreateUser, User};
+use crate::api::repositories;
+use crate::api::{core::error_handlers, models::user};
 
 #[derive(OpenApi)]
 #[openapi(paths(create_user, get_users, get_user), components(schemas(User)))]
@@ -81,24 +82,29 @@ async fn get_user(
     db: web::Data<Database>,
 ) -> Result<HttpResponse, error_handlers::ApiError> {
     // Simulate user lookup
-    let oid = ObjectId::parse_str(user_id.as_str());
-    if oid.is_ok() {
-        let collection = db.collection::<User>("users");
-        match collection
-            .find_one(doc! {
-               "_id": oid.unwrap()
-            })
-            .await
-        {
-            Ok(user) => match user {
-                Some(user) => {
-                    log::debug!("{:?} {:?}", user, user.id());
-                    Ok(HttpResponse::Ok().json(user))
-                }
-                None => Err(error_handlers::ApiError::NotFound("User".to_string())),
-            },
-            Err(e) => Err(error_handlers::ApiError::UnprocessableEntity(e.to_string())),
-        }
+    let user_repo = repositories::UserRepository::new(&db).await;
+    let user = user_repo.get_by_id(user_id.to_string()).await;
+    if user.is_ok() {
+        Ok(HttpResponse::Ok().json(user.ok()))
+
+    // let oid = ObjectId::parse_str(user_id.as_str());
+    // if oid.is_ok() {
+    //     let collection = db.collection::<User>("users");
+    //     match collection
+    //         .find_one(doc! {
+    //            "_id": oid.unwrap()
+    //         })
+    //         .await
+    //     {
+    //         Ok(user) => match user {
+    //             Some(user) => {
+    //                 log::debug!("{:?} {:?}", user, user.id());
+    //                 Ok(HttpResponse::Ok().json(user))
+    //             }
+    //             None => Err(error_handlers::ApiError::NotFound("User".to_string())),
+    //         },
+    //         Err(e) => Err(error_handlers::ApiError::UnprocessableEntity(e.to_string())),
+    //     }
     } else {
         Err(error_handlers::ApiError::UnprocessableEntity(
             "Invalid ObjectID".to_string(),
