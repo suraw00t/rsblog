@@ -8,6 +8,7 @@ use utoipa_swagger_ui::{Config, SwaggerUi};
 
 pub mod core;
 mod models;
+pub mod repositories;
 mod routes;
 
 #[derive(OpenApi)]
