@@ -2798,6 +2798,7 @@ dependencies = [
  "mongodb",
  "mongodm",
  "oauth2",
+ "once_cell",
  "page-hunter",
  "phf",
  "serde",
