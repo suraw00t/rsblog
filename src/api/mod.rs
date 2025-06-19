@@ -10,6 +10,7 @@ pub mod core;
 mod models;
 pub mod repositories;
 mod routes;
+pub mod schemas;
 
 #[derive(OpenApi)]
 #[openapi(
