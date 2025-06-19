@@ -1,18 +1,21 @@
-use crate::api::models::user::{CreateUser, User};
+use crate::api::models::user::{CreateUser, FindUser, User};
 use crate::api::repositories::base::BaseRepository;
 
-use mongodb::{error::Result, Database};
+use mongodb::error::Result;
 
 pub struct UserRepository {
-    pub base: BaseRepository<User>,
+    pub base: BaseRepository<User, FindUser>,
 }
 
 #[allow(unused)]
 impl UserRepository {
-    pub async fn new(db: &Database) -> Self {
-        let collection = db.collection::<User>("users");
-        let base = BaseRepository::new(collection);
+    pub async fn new() -> Self {
+        let base = BaseRepository::<User, FindUser>::new("users");
         Self { base }
+    }
+
+    pub async fn get(&self, find_user: Option<FindUser>) -> Result<Option<Vec<User>>> {
+        self.base.get(find_user).await
     }
 
     // Optional: expose base methods directly
