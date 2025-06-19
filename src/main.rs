@@ -60,9 +60,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     let config = api::core::config::Config::from_env();
-    let database = common::db::connect_to_mongodb(&config)
-        .await
-        .expect(format!("Failed to connect to MongoDB: {:?}", config.mongodb_uri).as_str());
+    common::db::init_db(&config).await;
 
     log::info!("starting HTTP server");
     let mut tera = app::initialize_template();
@@ -74,7 +72,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .app_data(web::JsonConfig::default())
             .app_data(web::Data::new(tera.clone()))
-            .app_data(web::Data::new(database.clone()))
             .configure(api::config)
             .configure(app::config)
             .wrap_fn(move |req, srv| {
