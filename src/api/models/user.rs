@@ -10,10 +10,13 @@ pub struct BaseUser {
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
 pub struct CreateUser(pub BaseUser);
 
-#[derive(Serialize, Deserialize, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
+pub struct FindUser(pub BaseUser);
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
 pub struct User {
     #[serde(
         rename(serialize = "id", deserialize = "_id"),
@@ -32,16 +35,5 @@ impl From<CreateUser> for User {
             id: None,
             base: create_user.0,
         }
-    }
-}
-
-impl User {
-    pub fn with_id(mut self, id: ObjectId) -> Self {
-        self.id = Some(id);
-        self
-    }
-
-    pub fn id(&self) -> Option<String> {
-        self.id.map(|id| id.to_hex())
     }
 }
