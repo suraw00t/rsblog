@@ -8,6 +8,7 @@
 - [x] Added embed whole directory
 - [x] Clean code makes development easier
 - [x] Support HTTP2
+- [x] Added Repository provided by mongodb
 - [ ] Move static information to database
 
 ## Authentication
@@ -18,6 +19,7 @@
 ## OpenAPI Specification
 - [x] Added OpenAPI 3.1
 - [x] Added good HTTP status code and detail
+- [x] Added Pagination
 
 ## Template
 - [x] Support Tera template
