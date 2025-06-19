@@ -1,49 +1,70 @@
+#![allow(unused)]
+use futures::TryStreamExt;
 use mongodb::{
-    bson::{doc, oid::ObjectId, Bson},
-    error::Error as MongoError,
-    error::Result,
+    bson::{doc, oid::ObjectId, to_document, Bson},
+    error::{Error, Result},
     Collection,
 };
 use serde::{de::DeserializeOwned, Serialize};
 use std::marker::PhantomData;
 
-pub struct BaseRepository<T>
+use crate::common::db::get_db;
+
+pub struct BaseRepository<T, U>
 where
     T: Send + Sync + Serialize + DeserializeOwned + Unpin + 'static,
+    U: Send + Sync + Serialize + DeserializeOwned + Unpin + 'static,
 {
-    pub collection: Collection<T>,
-    _marker: PhantomData<T>,
+    _marker: PhantomData<(T, U)>,
+    collection_name: String,
 }
 
-#[allow(unused)]
-impl<T> BaseRepository<T>
+impl<T, U> BaseRepository<T, U>
 where
     T: Unpin + Send + Sync + Serialize + DeserializeOwned + 'static,
+    U: Unpin + Send + Sync + Serialize + DeserializeOwned + 'static,
 {
-    pub fn new(collection: Collection<T>) -> Self {
+    pub fn new(collection_name: &str) -> Self {
         BaseRepository {
-            collection,
             _marker: PhantomData,
+            collection_name: collection_name.to_string(),
         }
     }
 
-    // pub async fn get_many(&self) -> Result<Option<T>> {
-    //     Ok(MongoError());
-    //     // Ok(())
-    // }
+    fn collection(&self) -> Collection<T> {
+        let db = get_db();
+        db.collection::<T>(&self.collection_name)
+    }
+
+    pub async fn get(&self, entity: Option<U>) -> Result<Option<Vec<T>>> {
+        let filter = match entity {
+            Some(e) => {
+                let doc = to_document(&e).unwrap_or_else(|_| doc! {});
+                doc
+            }
+            None => doc! {},
+        };
+        match self.collection().find(filter).await {
+            Ok(cursor) => match cursor.try_collect::<Vec<T>>().await {
+                Ok(items) => Ok(Some(items)),
+                Err(e) => Err(e),
+            },
+            Err(e) => Err(Error::custom(e)),
+        }
+    }
 
     pub async fn get_by_id(&self, id: String) -> Result<Option<T>> {
         match ObjectId::parse_str(&id) {
             Ok(oid) => {
                 let filter = doc! { "_id": oid };
-                self.collection.find_one(filter).await
+                self.collection().find_one(filter).await
             }
-            Err(_) => Ok(None), // or return Err(MongoError::...) if you want
+            Err(e) => Err(Error::custom(e)),
         }
     }
 
     pub async fn create(&self, entity: T) -> Result<Option<T>> {
-        match self.collection.insert_one(&entity).await {
+        match self.collection().insert_one(&entity).await {
             Ok(result) => {
                 if let Some(id) = result.inserted_id.as_object_id() {
                     self.get_by_id(id.to_string()).await
@@ -51,7 +72,26 @@ where
                     Ok(None)
                 }
             }
-            Err(_) => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub async fn update(&self, id: String, entity: T) -> Result<Option<T>> {
+        match ObjectId::parse_str(&id) {
+            Ok(oid) => {
+                let filter = doc! {"_id": oid};
+                let update = match to_document(&entity) {
+                    Ok(doc) => doc,
+                    Err(e) => return Err(Error::custom(e)),
+                };
+
+                let updated_result = self.collection().update_one(filter, update).await;
+                match updated_result {
+                    Ok(_) => self.get_by_id(id).await,
+                    Err(e) => Err(e),
+                }
+            }
+            Err(e) => Err(Error::custom(e)),
         }
     }
 
@@ -65,38 +105,22 @@ where
             Ok(oid) => {
                 let filter = doc! { "_id": oid };
                 let update = doc! { "$set": { field_name: new_value.into() } };
-                let updated_result = self.collection.update_one(filter, update).await;
 
+                let updated_result = self.collection().update_one(filter, update).await;
                 match updated_result {
                     Ok(_) => self.get_by_id(id).await,
-                    Err(_) => Ok(None),
+                    Err(e) => Err(e),
                 }
             }
-            Err(_) => Ok(None),
+            Err(e) => Err(Error::custom(e)),
         }
     }
 
-    // pub async fn disactive_by_id(&self, id: String) -> Result<Option<T>> {
-    pub async fn disactive_by_id(&self, id: String) -> Result<()> {
-        Ok(())
+    pub async fn disactive_by_id(&self, id: String) -> Result<Option<T>> {
+        self.update_field_by_id(id, "status", "disactive").await
     }
 
-    // pub async fn delete_by_id(&self, id: String) -> Result<Option<T>> {
-    pub async fn delete_by_id(&self, id: String) -> Result<()> {
-        Ok(())
+    pub async fn delete_by_id(&self, id: String) -> Result<Option<T>> {
+        self.update_field_by_id(id, "status", "deleted").await
     }
 }
-
-// pub trait BaseRepository<T> {
-//     fn get_by_id(&self, id: u32) -> Option<T>;
-//     fn create(&mut self, entity: T);
-// }
-
-// impl BaseRepository {
-//     fn get_list(&self) {}
-//     fn get_by_id(&self, id: String) {}
-//     fn create(&self) {}
-//     fn update(&self) {}
-//     fn delete_by_id(&self, id: String) {}
-//     fn disactive_by_id(&self, id: String) {}
-// }
