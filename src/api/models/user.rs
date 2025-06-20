@@ -1,6 +1,6 @@
 use mongodb::bson::oid::ObjectId;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
 
 use crate::api::models::serialize_object_id;
 
@@ -14,7 +14,15 @@ pub struct BaseUser {
 pub struct CreateUser(pub BaseUser);
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
-pub struct FindUser(pub BaseUser);
+pub struct UpdateUser(pub BaseUser);
+
+#[derive(Serialize, Deserialize, Debug, ToSchema, Clone, IntoParams)]
+pub struct FindUser {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub email: Option<String>,
+}
 
 #[derive(Serialize, Deserialize, Debug, ToSchema, Clone)]
 pub struct User {
@@ -34,6 +42,15 @@ impl From<CreateUser> for User {
         User {
             id: None,
             base: create_user.0,
+        }
+    }
+}
+
+impl From<UpdateUser> for User {
+    fn from(update_user: UpdateUser) -> Self {
+        User {
+            id: None,
+            base: update_user.0,
         }
     }
 }
