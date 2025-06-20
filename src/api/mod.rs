@@ -1,8 +1,9 @@
 use actix_web::web;
+use actix_web_httpauth::middleware::HttpAuthentication;
 
 use utoipa::{openapi::Server, openapi::ServerBuilder, OpenApi};
 use utoipa_rapidoc::RapiDoc;
-use utoipa_redoc::{Redoc, Servable};
+use utoipa_redoc::{Redoc, Servable as RedocServable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
@@ -46,13 +47,19 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     let mut doc = ApiDoc::openapi();
     doc.servers = Some(get_servers("/"));
 
-    cfg.service(web::scope("/api").configure(routes::config))
-        .service(
-            SwaggerUi::new("/swagger-ui/{_:.*}")
-                .url(openapi_json, doc.clone())
-                .config(Config::new([openapi_json_with_prefix.clone()]).validator_url("")),
-        )
-        .service(RapiDoc::new(openapi_json_with_prefix.clone()).path("/rapidoc"))
-        .service(Scalar::with_url("/scalar", doc.clone()))
-        .service(Redoc::with_url("/redoc", doc.clone()));
+    cfg.service(
+        web::scope("/api")
+            .configure(routes::config)
+            .wrap(HttpAuthentication::with_fn(
+                core::security::Bearer::validator,
+            )),
+    )
+    .service(
+        SwaggerUi::new("/swagger-ui/{_:.*}")
+            .url(openapi_json, doc.clone())
+            .config(Config::new([openapi_json_with_prefix.clone()]).validator_url("")),
+    )
+    .service(RapiDoc::new(openapi_json_with_prefix.clone()).path("/rapidoc"))
+    .service(Scalar::with_url("/scalar", doc.clone()))
+    .service(Redoc::with_url("/redoc", doc.clone()));
 }
