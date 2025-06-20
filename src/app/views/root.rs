@@ -1,12 +1,12 @@
 use actix_web::{error, web, Error, Responder, Result};
-use mongodb::{bson::doc, Database};
+use mongodb::bson::doc;
 use std::collections::HashMap;
 
 use crate::app::models::page_view::PageView;
+use crate::common::db::get_db;
 
 // #[get("/")]
 async fn index(
-    db: web::Data<Database>,
     tmpl: web::Data<tera::Tera>,
     query: web::Query<HashMap<String, String>>,
 ) -> Result<impl Responder, Error> {
@@ -18,7 +18,7 @@ async fn index(
         tmpl.render("user.html", &ctx)
             .map_err(|_| error::ErrorInternalServerError("Template error"))?
     } else {
-        let collection = db.collection::<PageView>("page_views");
+        let collection = get_db().collection::<PageView>("page_views");
         // Update or insert page view count
         let filter = doc! { "path": "/" };
         let update = doc! {
