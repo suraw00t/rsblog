@@ -1,4 +1,5 @@
 pub mod base;
-pub mod user;
+pub mod tokens;
+pub mod users;
 
-use crate::api::models::base::serialize_object_id;
+pub use crate::api::models::base::serialize_object_id;

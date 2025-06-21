@@ -2,12 +2,13 @@ use actix_web::{get, post, put, web, HttpResponse, Responder};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use mongodb::bson::doc;
 use page_hunter::{bind_records, paginate_records};
-use utoipa::OpenApi;
+use utoipa::{OpenApi, openapi::security::SecurityScheme};
+use utoipa::openapi::security::{HttpBuilder, HttpAuthScheme};
 
 use crate::api::core::error_handlers;
-use crate::api::models::user::{CreateUser, FindUser, UpdateUser, User};
+use crate::api::models::users::{CreateUser, FindUser, UpdateUser, User};
 use crate::api::repositories;
-use crate::api::schemas::user::{UserBook, UserPage};
+use crate::api::schemas::users::{UserBook, UserPage};
 use crate::api::schemas::{BindingParams, PaginationParams};
 
 #[derive(OpenApi)]
@@ -18,20 +19,21 @@ use crate::api::schemas::{BindingParams, PaginationParams};
 pub struct UserApi;
 
 #[utoipa::path(
-params(
+    params(
         PaginationParams,
         FindUser,
     ),
     responses(
-        (status = 200, description = "List of users", body = UserPage),
-        (status = 422, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
-    )
+        (status = OK, description = "List of users", body = UserPage),
+        (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
+    ),
+    
 )]
 #[get("")]
 pub async fn get_users(
     params: web::Query<PaginationParams>,
     find_user: web::Query<FindUser>,
-    auth: BearerAuth,
+    // _auth: BearerAuth,
 ) -> impl Responder {
     let user_repo = repositories::UserRepository::new().await;
     let users = user_repo.get(Some(find_user.into_inner())).await;
@@ -53,9 +55,9 @@ pub async fn get_users(
 
 #[utoipa::path(
     responses(
-        (status = 200, description = "A user", body = User),
-        (status = 404, description = "User not found", body = error_handlers::ErrorResponse),
-        (status = 422, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
+        (status = OK, description = "A user", body = User),
+        (status = NOT_FOUND, description = "User not found", body = error_handlers::ErrorResponse),
+        (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     )
 )]
 #[get("/{user_id}")]
@@ -71,8 +73,8 @@ async fn get_user(user_id: web::Path<String>) -> Result<HttpResponse, error_hand
 
 #[utoipa::path(
     responses(
-        (status = 201, description = "User created successfully", body = User),
-        (status = 422, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
+        (status = CREATED, description = "User created successfully", body = User),
+        (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
 )]
 #[post("")]
@@ -91,8 +93,8 @@ pub async fn create_user(user_data: web::Json<CreateUser>) -> impl Responder {
         ("user_id" = String, Path, description = "User id"),
     ),
     responses(
-        (status = 200, description = "User updated successfully", body = User),
-        (status = 422, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
+        (status = OK, description = "User updated successfully", body = User),
+        (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
 )]
 #[put("/{user_id}")]

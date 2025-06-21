@@ -2,7 +2,8 @@
 use serde::Deserialize;
 use utoipa::IntoParams;
 
-pub mod user;
+pub mod tokens;
+pub mod users;
 
 #[derive(Deserialize, IntoParams)]
 pub struct PaginationParams {

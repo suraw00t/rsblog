@@ -1,4 +1,4 @@
-use crate::api::models::user::{CreateUser, FindUser, UpdateUser, User};
+use crate::api::models::users::{CreateUser, FindUser, UpdateUser, User};
 use crate::api::repositories::base::BaseRepository;
 
 use mongodb::error::Result;
