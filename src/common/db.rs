@@ -10,6 +10,10 @@ pub async fn init_db(config: &Config) {
         .await
         .expect("MongoDB connect failed");
     let db = client.database(&config.database_name);
+    log::debug!(
+        "mongodb uri: {}",
+        config.mongodb_uri.clone() + "/" + config.database_name.clone().as_str()
+    );
     let mut mongo_guard = MONGO_CLIENT.lock().unwrap();
     *mongo_guard = Some(db);
 }
