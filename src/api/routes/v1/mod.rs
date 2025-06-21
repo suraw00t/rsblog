@@ -2,13 +2,13 @@ use actix_web::web;
 use utoipa::OpenApi;
 
 mod root;
-pub mod users;
+mod users;
 
 #[derive(OpenApi)]
-#[openapi(nest((path = "/v1/users", api = users::UserApi)))]
+#[openapi(nest((path = "/users", api = users::UserApi)))]
 pub struct V1Api;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.configure(root::config)
-        .service(web::scope("/v1").configure(users::config));
+        .service(web::scope("/users").configure(users::config));
 }

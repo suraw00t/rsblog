@@ -40,13 +40,11 @@ impl Modify for OAuth2PasswordBearer {
 #[derive(OpenApi)]
 #[openapi(
     nest(
-       (path = "/api", api = routes::v1::V1Api)
+       (path = "/api", api = routes::Api)
     ),
     modifiers(&OAuth2PasswordBearer),
     security(
-        (
-            "OAuth2PasswordBearer" = [],
-        ),
+        ("OAuth2PasswordBearer" = [])
     )
 )]
 struct ApiDoc;

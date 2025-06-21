@@ -114,11 +114,8 @@ pub async fn update_user(
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/users")
-            .service(get_user)
-            .service(get_users)
-            .service(create_user)
-            .service(update_user),
-    );
+    cfg.service(get_user)
+        .service(get_users)
+        .service(create_user)
+        .service(update_user);
 }
