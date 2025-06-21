@@ -4,7 +4,6 @@ use actix_web::{
     test::TestRequest,
     web, App, HttpServer,
 };
-use actix_web_lab::header::X_FORWARDED_PREFIX;
 use std::{borrow::Borrow, cell::RefCell, collections::HashMap};
 
 mod api;
@@ -80,12 +79,10 @@ async fn main() -> std::io::Result<()> {
                         .borrow_mut()
                         .get_or_insert_with(|| req.resource_map().clone());
                 });
-                if let Some(prefix) = req.headers().get(X_FORWARDED_PREFIX) {
-                    if let Ok(prefix_str) = prefix.to_str() {
-                        REQUEST_PREFIX.with(|p| {
-                            *p.borrow_mut() = Some(prefix_str.to_string());
-                        });
-                    }
+                if let Ok(prefix) = std::env::var("PREFIX") {
+                    REQUEST_PREFIX.with(|p| {
+                        *p.borrow_mut() = Some(prefix);
+                    });
                 }
                 srv.borrow().call(req)
             })
