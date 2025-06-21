@@ -36,18 +36,12 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
         let routes = routes_ref.as_ref().ok_or(tera::Error::msg(
             "`url_for` should only be called in request context",
         ))?;
-        let prefix = std::env::var("PREFIX").ok().unwrap();
+        let prefix = std::env::var("PREFIX").ok().unwrap_or(String::from(""));
         let fake_req = TestRequest::default().to_http_request();
         let url = routes
             .url_for(&fake_req, name, elements)
             .or(Err(tera::Error::msg("resource not found")))?;
-        let path = url.path();
-        let full_path = if prefix.is_empty() {
-            path.to_string()
-        } else {
-            format!("{}{}", prefix, path)
-        };
-
+        let full_path = format!("{}{}", prefix, url.path());
         Ok(tera::Value::String(full_path))
     })
 }
