@@ -2788,6 +2788,7 @@ dependencies = [
  "actix-web-httpauth",
  "actix-web-lab",
  "base64 0.22.1",
+ "chrono",
  "dotenvy",
  "env_logger",
  "futures",
