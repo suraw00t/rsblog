@@ -4,17 +4,18 @@ use mongodb::bson::doc;
 use page_hunter::{bind_records, paginate_records};
 use utoipa::{OpenApi, openapi::security::SecurityScheme};
 use utoipa::openapi::security::{HttpBuilder, HttpAuthScheme};
+use actix_multipart::form::MultipartForm;
 
 use crate::api::core::error_handlers;
 use crate::api::models::users::{CreateUser, FindUser, UpdateUser, User};
 use crate::api::repositories;
-use crate::api::schemas::users::{UserBook, UserPage};
+use crate::api::schemas::users::{UserBook, UserPage, PictureProfile};
 use crate::api::schemas::{BindingParams, PaginationParams};
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(create_user, get_users, get_user, update_user),
-    components(schemas(User, UserBook, UserPage))
+    paths(create_user, get_users, get_user, update_user, picture_profile),
+    components(schemas(User, UserBook, UserPage, PictureProfile))
 )]
 pub struct UserApi;
 
@@ -27,6 +28,7 @@ pub struct UserApi;
         (status = OK, description = "List of users", body = UserPage),
         (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
+    security(),
     
 )]
 #[get("")]
@@ -113,9 +115,30 @@ pub async fn update_user(
     }
 }
 
+#[utoipa::path(
+    request_body(content = PictureProfile, content_type = "multipart/form-data")
+)]
+#[post("/{user_id}/picture")]
+async fn picture_profile(user_id: web::Path<String>, MultipartForm(form): MultipartForm<PictureProfile>) -> impl Responder {
+    log::debug!("User ID: {}", user_id);
+    // let name = form.name.to_string();
+    let name = form.name.as_ref().map_or("No name provided".to_string(), |n| n.to_string());
+    let file = &form.file;
+    format!(
+        "Greetings: name: {name}, type: {} size: {} file_name: {}!",
+        file.content_type
+            .as_ref()
+            .map(|mime| mime.to_string())
+            .unwrap_or_default(),
+        file.size,
+        file.file_name.as_ref().unwrap_or(&String::new())
+    )
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(get_user)
         .service(get_users)
         .service(create_user)
-        .service(update_user);
+        .service(update_user)
+        .service(picture_profile);
 }
