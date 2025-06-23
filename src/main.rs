@@ -4,7 +4,8 @@ use actix_web::{
     test::TestRequest,
     web, App, HttpServer,
 };
-use std::{borrow::Borrow, cell::RefCell, collections::HashMap};
+use std::{borrow::Borrow, cell::RefCell, collections::HashMap, io};
+use utoipa_actix_web::AppExt;
 
 mod api;
 mod app;
@@ -47,7 +48,7 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
 }
 
 #[actix_web::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> io::Result<()> {
     common::config::Config::init_from_env();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
     common::db::init_db().await;
@@ -58,12 +59,15 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .wrap(common::forwarded_prefix::ForwardPrefix)
-            .wrap(middleware::Logger::default())
-            .app_data(web::JsonConfig::default())
-            .app_data(web::Data::new(tera.clone()))
+            .into_utoipa_app()
+            .into_app()
+            // .split_for_parts()
             .configure(api::config)
             .configure(app::config)
+            .app_data(web::JsonConfig::default())
+            .app_data(web::Data::new(tera.clone()))
+            .wrap(common::forwarded_prefix::ForwardPrefix)
+            .wrap(middleware::Logger::default())
             .wrap_fn(move |req, srv| {
                 ROUTES_KEY.with(|routes| {
                     routes
