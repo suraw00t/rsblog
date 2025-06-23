@@ -13,6 +13,8 @@ use utoipa_redoc::{Redoc, Servable as RedocServable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
 use utoipa_swagger_ui::{Config, SwaggerUi};
 
+use crate::common::config::Config as ConfigEnv;
+
 pub mod core;
 mod models;
 pub mod repositories;
@@ -28,9 +30,9 @@ impl Modify for OAuth2PasswordBearer {
             schema.add_security_scheme(
                 "OAuth2PasswordBearer",
                 SecurityScheme::OAuth2(OAuth2::new([Flow::Password(Password::with_refresh_url(
-                    std::env::var("PREFIX").ok().unwrap_or("".to_string()) + "/v1/oauth/login",
+                    ConfigEnv::get_prefix() + "/v1/oauth/login",
                     Scopes::default(),
-                    std::env::var("PREFIX").ok().unwrap_or("".to_string()) + "/v1/oauth/refresh",
+                    ConfigEnv::get_prefix() + "/v1/oauth/refresh",
                 ))])),
             );
         }
@@ -49,24 +51,16 @@ impl Modify for OAuth2PasswordBearer {
 )]
 struct ApiDoc;
 
-fn get_servers(base: &str) -> Vec<Server> {
-    match std::env::var("PREFIX") {
-        Ok(prefix) => vec![ServerBuilder::new()
-            .url(&format!("{}", prefix.trim_end_matches('/')))
-            .description(Some("Production Server"))
-            .build()],
-        Err(_) => vec![ServerBuilder::new()
-            .url(base)
-            .description(Some("Production Server"))
-            .build()],
-    }
+fn get_api_path(base: &str) -> String {
+    let prefix = ConfigEnv::get_prefix();
+    format!("{}{}", prefix.trim_end_matches('/'), base)
 }
 
-fn get_api_path(base: &str) -> String {
-    match std::env::var("PREFIX") {
-        Ok(prefix) => format!("{}{}", prefix.trim_end_matches('/'), base),
-        Err(_) => base.to_string(),
-    }
+fn get_servers(base: &str) -> Vec<Server> {
+    vec![ServerBuilder::new()
+        .url(get_api_path(base))
+        .description(Some("Production Server"))
+        .build()]
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
@@ -87,7 +81,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
                 Config::new([openapi_json_with_prefix.clone()]), // .validator_url("none")
             ),
     )
-    .service(RapiDoc::new(openapi_json_with_prefix.clone()).path("/rapidoc"))
+    .service(RapiDoc::new(openapi_json_with_prefix).path("/rapidoc"))
     .service(Scalar::with_url("/scalar", doc.clone()))
-    .service(Redoc::with_url("/redoc", doc.clone()));
+    .service(Redoc::with_url("/redoc", doc));
 }

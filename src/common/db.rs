@@ -1,12 +1,12 @@
-use crate::api::core::config::Config;
+use crate::common::config::Config;
 use mongodb::{options::ClientOptions, Client, Database};
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 
 static MONGO_CLIENT: Lazy<Mutex<Option<Database>>> = Lazy::new(|| Mutex::new(None));
 
-pub async fn init_db(config: &Config) {
-    let client_options = ClientOptions::parse(config.get_database_uri())
+pub async fn init_db() {
+    let client_options = ClientOptions::parse(Config::get_database_uri())
         .await
         .expect("Failed to parse MongoDB URI");
     let client = Client::with_options(client_options).expect("MongoDB connect failed");

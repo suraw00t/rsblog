@@ -36,7 +36,7 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
         let routes = routes_ref.as_ref().ok_or(tera::Error::msg(
             "`url_for` should only be called in request context",
         ))?;
-        let prefix = std::env::var("PREFIX").ok().unwrap_or(String::from(""));
+        let prefix = common::config::Config::get_prefix();
         let fake_req = TestRequest::default().to_http_request();
         let url = routes
             .url_for(&fake_req, name, elements)
@@ -48,11 +48,9 @@ fn tera_url_for(args: &HashMap<String, tera::Value>) -> Result<tera::Value, tera
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenvy::dotenv().ok();
+    common::config::Config::init_from_env();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
-
-    let config = api::core::config::Config::from_env();
-    common::db::init_db(&config).await;
+    common::db::init_db().await;
 
     log::info!("starting HTTP server");
     let mut tera = app::initialize_template();
@@ -75,21 +73,10 @@ async fn main() -> std::io::Result<()> {
                 srv.borrow().call(req)
             })
     })
-    .workers(
-        std::env::var("WORKERS")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(1),
-    )
+    .workers(common::config::Config::get_workers())
     .bind_auto_h2c((
-        std::env::var("ADDR")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(std::net::Ipv4Addr::UNSPECIFIED),
-        std::env::var("PORT")
-            .ok()
-            .and_then(|s| s.parse().ok())
-            .unwrap_or(8080),
+        common::config::Config::get_address(),
+        common::config::Config::get_port(),
     ))?
     .run()
     .await
