@@ -121,8 +121,12 @@ pub async fn update_user(
 #[post("/{user_id}/picture")]
 async fn picture_profile(user_id: web::Path<String>, MultipartForm(form): MultipartForm<PictureProfile>) -> impl Responder {
     log::debug!("User ID: {}", user_id);
-    // let name = form.name.to_string();
-    let name = form.name.as_ref().map_or("No name provided".to_string(), |n| n.to_string());
+    let name = match form.name.map(|n| n.to_string()) {
+        Some(n) => n,
+        None => "".to_string()
+    };
+    // let name = form.name.map(|n| n.to_string()).unwrap_or("".to_string());
+    // log::debug!("`name` is empty?: {}", name.is_empty());
     let file = &form.file;
     format!(
         "Greetings: name: {name}, type: {} size: {} file_name: {}!",
