@@ -1,7 +1,7 @@
 [package]
 name = "rsblog"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 actix-web = "~4.11"
@@ -41,4 +41,3 @@ utoipa-redoc = { version = "~6.0", features = ["actix-web"] }
 utoipa-rapidoc = { version = "~6.0", features = ["actix-web"] }
 utoipa-scalar = { version = "~0.3", features = ["actix-web"] }
 utoipa-actix-web = "~0.1"
-
