@@ -25,8 +25,8 @@ pub struct UserApi;
         FindUser,
     ),
     responses(
-        (status = OK, description = "List of users", body = UserPage),
-        (status = UNAUTHORIZED, description = "Unauthorized", body = error_handlers::ErrorResponse),
+        (status = OK, description = "Ok", body = UserPage),
+        (status = UNAUTHORIZED, description = "Unauthorized"),
         (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
     security(),
@@ -36,7 +36,6 @@ pub struct UserApi;
 pub async fn get_users(
     params: web::Query<PaginationParams>,
     find_user: web::Query<FindUser>,
-    _auth: BearerAuth,
 ) -> Result<HttpResponse, error_handlers::ApiError> {
     let user_repo = repositories::UserRepository::new().await;
     let users = user_repo.get(Some(find_user.into_inner())).await;
@@ -58,13 +57,14 @@ pub async fn get_users(
 
 #[utoipa::path(
     responses(
-        (status = OK, description = "A user", body = User),
-        (status = NOT_FOUND, description = "User not found", body = error_handlers::ErrorResponse),
+        (status = OK, description = "Ok", body = User),
+        (status = UNAUTHORIZED, description = "Unauthorized"),
+        (status = NOT_FOUND, description = "Not Found", body = error_handlers::ErrorResponse),
         (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
-    )
+    ),
 )]
 #[get("/{user_id}")]
-async fn get_user(user_id: web::Path<String>) -> Result<HttpResponse, error_handlers::ApiError> {
+async fn get_user(user_id: web::Path<String>, _auth: BearerAuth) -> Result<HttpResponse, error_handlers::ApiError> {
     let user_repo = repositories::UserRepository::new().await;
     let user = user_repo.get_by_id(user_id.to_string()).await;
     match user {
@@ -76,9 +76,10 @@ async fn get_user(user_id: web::Path<String>) -> Result<HttpResponse, error_hand
 
 #[utoipa::path(
     responses(
-        (status = CREATED, description = "User created successfully", body = User),
+        (status = CREATED, description = "Created", body = User),
         (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
+    security(),
 )]
 #[post("")]
 pub async fn create_user(user_data: web::Json<CreateUser>) -> Result<HttpResponse, error_handlers::ApiError> {
@@ -96,9 +97,10 @@ pub async fn create_user(user_data: web::Json<CreateUser>) -> Result<HttpRespons
         ("user_id" = String, Path, description = "User id"),
     ),
     responses(
-        (status = OK, description = "User updated successfully", body = User),
+        (status = OK, description = "Ok", body = User),
         (status = UNPROCESSABLE_ENTITY, description = "Unprocessable Entity", body = error_handlers::ErrorResponse),
     ),
+    security(),
 )]
 #[put("/{user_id}")]
 pub async fn update_user(
@@ -119,13 +121,14 @@ pub async fn update_user(
 #[utoipa::path(
     request_body(content = UploadPictureProfile, content_type = "multipart/form-data"),
     responses(
-        (status = CREATED, description = "Upload user picture profile", body = PictureProfile)
+        (status = CREATED, description = "Created", body = PictureProfile)
     ),
+    security(),
 )]
 #[post("/{user_id}/picture")]
 async fn picture_profile(
     user_id: web::Path<String>,
-    MultipartForm(form): MultipartForm<UploadPictureProfile>
+    MultipartForm(form): MultipartForm<UploadPictureProfile>,
 ) -> Result<HttpResponse, error_handlers::ApiError> {
     log::debug!("User ID: {}", user_id);
     let name = match form.rename.map(|n| n.to_string()) {

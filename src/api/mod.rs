@@ -6,7 +6,7 @@ use utoipa::openapi::security::{
     AuthorizationCode, Flow, Http, Implicit, OAuth2, Password, Scopes,
 };
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityRequirement, SecurityScheme};
-use utoipa::{openapi, Modify, OpenApi};
+use utoipa::{Modify, OpenApi, openapi};
 use utoipa::{openapi::Server, openapi::ServerBuilder};
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable as RedocServable};
@@ -57,10 +57,12 @@ fn get_api_path(base: &str) -> String {
 }
 
 fn get_servers(base: &str) -> Vec<Server> {
-    vec![ServerBuilder::new()
-        .url(get_api_path(base))
-        .description(Some("Production Server"))
-        .build()]
+    vec![
+        ServerBuilder::new()
+            .url(get_api_path(base))
+            .description(Some("Production Server"))
+            .build(),
+    ]
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
