@@ -1,3 +1,4 @@
+#![allow(unused)]
 use crate::api::models::users::{CreateUser, FindUser, UpdateUser, User};
 use crate::api::repositories::base::BaseRepository;
 
@@ -7,7 +8,6 @@ pub struct UserRepository {
     pub base: BaseRepository<User, FindUser>,
 }
 
-#[allow(unused)]
 impl UserRepository {
     pub async fn new() -> Self {
         let base = BaseRepository::<User, FindUser>::new("users");

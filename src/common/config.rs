@@ -19,6 +19,8 @@ pub struct Config {
     pub port: u16,
     pub prefix: String,
     pub rust_log: String,
+    pub api_login_url: String,
+    pub api_refresh_url: String,
 }
 
 impl Config {
@@ -49,6 +51,12 @@ impl Config {
                 .unwrap_or(8080),
             prefix: var("PREFIX").ok().unwrap_or("".to_string()),
             rust_log: var("RUST_LOG").ok().unwrap_or("info".to_string()),
+            api_login_url: var("API_LOGIN_URL")
+                .ok()
+                .unwrap_or("/api/v1/auth/login".to_string()),
+            api_refresh_url: var("API_REFRESH_URL")
+                .ok()
+                .unwrap_or("/api/v1/auth/refresh".to_string()),
         }
     }
 
@@ -94,5 +102,13 @@ impl Config {
 
     pub fn get_prefix() -> String {
         Config::get_config().prefix
+    }
+
+    pub fn get_api_login_url() -> String {
+        Config::get_prefix() + &Config::get_config().api_login_url
+    }
+
+    pub fn get_api_refresh_url() -> String {
+        Config::get_prefix() + &Config::get_config().api_refresh_url
     }
 }

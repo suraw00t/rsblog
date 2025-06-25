@@ -22,19 +22,28 @@ mod routes;
 pub mod schemas;
 
 #[derive(Debug, Serialize)]
-struct OAuth2PasswordBearer;
+struct HttpAuthentications;
 
-impl Modify for OAuth2PasswordBearer {
+impl Modify for HttpAuthentications {
     fn modify(&self, openapi: &mut openapi::OpenApi) {
         if let Some(schema) = openapi.components.as_mut() {
             schema.add_security_scheme(
                 "OAuth2PasswordBearer",
                 SecurityScheme::OAuth2(OAuth2::new([Flow::Password(Password::with_refresh_url(
-                    ConfigEnv::get_prefix() + "/v1/oauth/login",
+                    ConfigEnv::get_api_login_url(),
                     Scopes::default(),
-                    ConfigEnv::get_prefix() + "/v1/oauth/refresh",
+                    ConfigEnv::get_api_refresh_url(),
                 ))])),
             );
+            // schema.add_security_scheme(
+            //     "ApiKey",
+            //     SecurityScheme::Http(
+            //         HttpBuilder::new()
+            //             .scheme(HttpAuthScheme::Bearer)
+            //             .bearer_format("JWT")
+            //             .build(),
+            //     ),
+            // );
         }
     }
 }
@@ -44,9 +53,12 @@ impl Modify for OAuth2PasswordBearer {
     nest(
        (path = "/api", api = routes::Api)
     ),
-    modifiers(&OAuth2PasswordBearer),
+    modifiers(&HttpAuthentications),
     security(
-        ("OAuth2PasswordBearer" = [])
+        (
+            "OAuth2PasswordBearer" = [],
+            // "ApiKey" = []
+        )
     )
 )]
 struct ApiDoc;

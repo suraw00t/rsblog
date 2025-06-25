@@ -1,11 +1,11 @@
 #![allow(unused)]
 use futures::{StreamExt, TryStreamExt};
 use mongodb::{
-    bson::{doc, oid::ObjectId, to_document, Bson},
-    error::{Error, Result},
     Collection,
+    bson::{Bson, doc, oid::ObjectId, to_document},
+    error::{Error, Result},
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use std::marker::PhantomData;
 
 use crate::common::db::get_db;
